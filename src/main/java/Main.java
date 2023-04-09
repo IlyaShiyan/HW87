@@ -1,47 +1,74 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
 
-        Connection dbconnection = null;
-        Statement statement = null;
+    private static final String url = "jdbc:mysql://localhost:3306/pets";
+    private static final String username = "root";
+    private static final String password = "159753An";
+    private static final String DB_Driver = "com.mysql.cj.jdbc.Driver";
 
-        String insertTableSQL = "INSERT INTO PETS" + "(appellation, name, age, colour, owner,id)" + "VALUES" +
-                " ('cat', 'Myrka', 10, 'grey', 'Pasha',11)";
-
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
         try {
-
-            dbconnection = getDBConnection();
-            statement = dbconnection.createStatement();
-            statement.executeUpdate(insertTableSQL);
+            createDbUserTable();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
     private static Connection getDBConnection() {
 
-        String url = "jdbc:mysql://localhost:3306";
-        String username = "root";
-        String password = "159753An";
         Connection dbconnection = null;
-        Statement statement = null;
         try {
-
-            Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();}
-        catch (Exception e){
-            System.out.println(e);
+            Class.forName(DB_Driver);}
+        catch (ClassNotFoundException e) {
+            System.out.println(e.getMessage());
         }
-        try{ dbconnection = DriverManager.getConnection(url, username, password);
+        try
+        { dbconnection = DriverManager.getConnection(url, username, password);
             return dbconnection;
-            } catch (Exception ex) {
-            System.out.println("Connection failed...");
-
-            System.out.println(ex);
-
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
         return dbconnection;
+    }
+
+    private static void createDbUserTable() throws SQLException {
+        Connection dbConnection = null;
+        Statement statement = null;
+
+        String insertTableSQL = "INSERT INTO pets (appellation, name, age, colour, owner,id)\n" +
+                "VALUES\n" +
+                "    ('parrot', 'Kesha', 5, 'yellow', 'Natalia',12),\n" +
+                "    ('hamster', 'Bob', 2, 'brown', 'Oleg',13),\n" +
+                "    ('rat', 'Larisa', 8, 'white','John',14);";
+        String selectTableSQL = "SELECT * FROM pets WHERE age<8;";
+        try {
+            dbConnection = getDBConnection();
+            statement = dbConnection.createStatement();
+            statement.executeUpdate(insertTableSQL);
+            ResultSet rs = statement.executeQuery(selectTableSQL);
+            while (rs.next()) {
+                String appellation = rs.getString("appellation");
+                String name = rs.getString("name");
+                String age = rs.getString("age");
+                String colour = rs.getString("colour");
+                String owner = rs.getString("owner");
+                String id = rs.getString("id");
+                System.out.println("appellation : " + appellation);
+                System.out.println("name: " + name);
+                System.out.println("age : " + age);
+                System.out.println("colour: " + colour);
+                System.out.println("owner : " + owner);
+                System.out.println("id: " + id);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+        }
     }
 }
